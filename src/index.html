@@ -3,15 +3,62 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-  <title>Vanilla JavaScript App</title>
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css"> -->
+  <title>Face Recognition App</title>
 </head>
 
 <body>
-  <main>
-    <h1>Vanilla JavaScript App</h1>
-  </main>
+  <form method="post" action="" enctype="multipart/form-data">
+      <!-- Method:
+      <select id="method_selector">
+          <option value="HOG" selected>HOG</option>
+          <option value="CNN">CNN</option>
+      </select>
+      <br> -->
+      <input type="file" id="upload_form" name="upload_form">
+  </form>
+
+  <p>Uploaded image file is:</p>
+  <div id="before"></div>
+
+  <!-- <p>Face Locations detected:</p> -->
+  <p>Maked up!:</p>
+  <div id="after"></div>
 </body>
 
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById("upload_form").addEventListener('change', (e) => {
+          let file_reader = new FileReader();
+          file_reader.readAsDataURL(e.target.files[0]);
+          file_reader.addEventListener('load', (e) => {
+              let before = document.getElementById("before");
+              if (before.firstChild) before.removeChild(before.lastChild);
+              let before_image = document.createElement("img");
+              before_image.src = e.target.result;
+              before.append(before_image);
+
+              let data = {"image": e.target.result};
+
+              let api_endpoint = "https://facerecognitionfunctions.azurewebsites.net/api/DetectFaceLandmarks";
+              // let selector = document.getElementById("method_selector");
+              // if (selector.value === "CNN") api_endpoint = api_endpoint + "?method=cnn";
+              fetch(api_endpoint, {
+                  method: 'post', 
+                  header: {'Content-Type': 'application/json'},
+                  body: JSON.stringify(data) 
+              })
+              .then(response => response.json())
+              .then(data => {
+                  let after = document.getElementById('after');
+                  if (after.firstChild) after.removeChild(after.lastChild);
+                  let after_image = document.createElement('img');
+                  after_image.src = data.image;
+                  after.append(after_image);
+              });
+          });
+      });
+  });
+</script>
 </html>
